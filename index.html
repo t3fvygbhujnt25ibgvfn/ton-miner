@@ -42,24 +42,25 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             width: 100%;
             box-sizing: border-box;
-            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
         }
 
         .wallet-display {
             height: 200px;
             width: 100%;
-            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-            position: relative;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border: 2px dashed var(--tg-theme-hint-color, #999999);
+            border-radius: 15px;
             padding: 15px;
-            box-sizing: border-box;
+            margin: 20px 0;
             overflow-y: auto;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             font-family: monospace;
             font-size: 0.9rem;
             text-align: left;
+            transition: border-color 0.3s ease;
+        }
+
+        .wallet-display:hover {
+            border-color: var(--tg-theme-button-color, #007aff);
         }
 
         .wallet-line {
@@ -67,7 +68,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding: 3px 0;
         }
 
         .wallet-line.green {
@@ -83,23 +83,21 @@
         }
 
         button {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            background: transparent;
             color: var(--tg-theme-text-color, #000000);
-            border: 1px solid var(--tg-theme-button-color, #007aff);
+            border: 2px dashed var(--tg-theme-hint-color, #999999);
             padding: 12px 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             font-size: 1rem;
             cursor: pointer;
             flex: 1;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-weight: 500;
-            box-shadow: none;
-            outline: none;
         }
 
         button:hover {
-            background: var(--tg-theme-bg-color, #ffffff);
             border-color: var(--tg-theme-button-color, #007aff);
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
         }
 
         button:active {
@@ -109,22 +107,21 @@
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            border-color: var(--tg-theme-hint-color, #999999);
+            border-style: solid;
         }
 
         #start-stop-button.active {
+            border: 2px solid var(--tg-theme-button-color, #007aff);
             background: var(--tg-theme-button-color, #007aff);
             color: var(--tg-theme-button-text-color, #ffffff);
-            border-color: var(--tg-theme-button-color, #007aff);
         }
 
         #withdraw-button {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            border: 1px solid #34C759;
+            border: 2px dashed #34C759;
         }
 
         #withdraw-button:not(:disabled):hover {
+            border: 2px solid #34C759;
             background: #34C759;
             color: white;
         }
@@ -138,17 +135,6 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             width: 100%;
             box-sizing: border-box;
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            button {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
         }
     </style>
 </head>
