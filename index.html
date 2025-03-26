@@ -42,13 +42,14 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             width: 100%;
             box-sizing: border-box;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
         }
 
         .wallet-display {
             height: 200px;
             width: 100%;
-            border: 2px dashed var(--tg-theme-hint-color, #999999);
-            border-radius: 15px;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 10px;
             margin: 20px 0;
             overflow: hidden;
             position: relative;
@@ -59,11 +60,6 @@
             font-family: monospace;
             font-size: 0.9rem;
             text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .wallet-display:hover {
-            border-color: var(--tg-theme-button-color, #007aff);
         }
 
         .wallet-line {
@@ -71,6 +67,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            padding: 3px 0;
         }
 
         .wallet-line.green {
@@ -82,41 +79,65 @@
             display: flex;
             gap: 10px;
             width: 100%;
+            margin-top: 15px;
         }
 
         button {
-            background: var(--tg-theme-button-color, #007aff);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 15px 30px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border: 1px solid var(--tg-theme-button-color, #007aff);
+            padding: 12px 20px;
             border-radius: 10px;
             font-size: 1rem;
             cursor: pointer;
             flex: 1;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            box-shadow: none;
+            outline: none;
         }
 
         button:hover {
-            opacity: 0.9;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #007aff);
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            border-color: var(--tg-theme-hint-color, #999999);
         }
 
-        button.stop {
-            background: #FF3B30;
+        #start-stop-button.active {
+            background: var(--tg-theme-button-color, #007aff);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #007aff);
         }
 
-        button.withdraw {
+        #withdraw-button {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border: 1px solid #34C759;
+        }
+
+        #withdraw-button:not(:disabled):hover {
             background: #34C759;
+            color: white;
         }
 
         .status {
             margin-top: 15px;
             font-size: 0.9rem;
             color: var(--tg-theme-hint-color, #888888);
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         @media (max-width: 600px) {
@@ -125,7 +146,8 @@
             }
             
             button {
-                padding: 12px 24px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -142,7 +164,7 @@
         
         <div class="buttons">
             <button id="start-stop-button" onclick="toggleMining()">Start</button>
-            <button class="withdraw" id="withdraw-button" onclick="withdraw()" disabled>Withdraw</button>
+            <button id="withdraw-button" onclick="withdraw()" disabled>Withdraw</button>
         </div>
         
         <div class="status" id="status">Press Start to begin mining</div>
@@ -207,7 +229,7 @@
                 // Start mining
                 isMining = true;
                 button.textContent = 'Stop';
-                button.classList.add('stop');
+                button.classList.add('active');
                 document.getElementById('status').textContent = 'Mining in progress...';
                 
                 // Start generating wallets
@@ -230,7 +252,7 @@
                 // Stop mining
                 isMining = false;
                 button.textContent = 'Start';
-                button.classList.remove('stop');
+                button.classList.remove('active');
                 document.getElementById('status').textContent = 'Mining stopped';
                 
                 clearInterval(walletInterval);
