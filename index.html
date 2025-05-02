@@ -3,1110 +3,746 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CiS Admin Panel | Telegram WebApp</title>
+    <title>CISPay Admin Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #bb86fc;
-            --secondary-color: #03dac6;
-            --error-color: #cf6679;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
+            --tg-theme-bg-color: #efeff3;
+            --tg-theme-button-color: #63d0f9;
+            --tg-theme-button-text-color: #000000;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
-
+        
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 80px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 60px;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--accent-color);
-            margin-bottom: 8px;
+        
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--tg-theme-text-color);
         }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-
-        .divider {
-            height: 1px;
-            background-color: var(--divider-color);
-            margin: 20px 0;
-            width: 100%;
-        }
-
-        .btn {
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
+        
+        .card {
+            background: #ffffff;
             border-radius: 12px;
-            padding: 14px 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             width: 100%;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+            transition: opacity 0.2s;
         }
-
-        .btn:hover {
-            background-color: #9a67ea;
-            transform: translateY(-2px);
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
-
-        .btn-secondary {
-            background-color: var(--card-color);
-            color: var(--text-color);
-            border: 1px solid var(--divider-color);
+        
+        button.secondary {
+            background: #f1f1f1;
+            color: #000;
         }
-
-        .btn-secondary:hover {
-            background-color: #2a2a2a;
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
+        
+        button.danger {
+            background: #ff3b30;
             color: white;
         }
-
-        .btn-warning {
-            background-color: var(--warning-color);
-            color: white;
-        }
-
-        .btn-danger {
-            background-color: var(--error-color);
-            color: white;
-        }
-
-        .btn-icon {
-            font-size: 20px;
-        }
-
-        .tabs {
+        
+        .api-key-item {
             display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--divider-color);
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
         }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
+        
+        .api-key-item:last-child {
+            border-bottom: none;
         }
-
-        .tab.active {
-            border-bottom: 3px solid var(--accent-color);
-            color: var(--accent-color);
+        
+        .payment-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
         }
-
+        
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .payment-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-waiting {
+            background: #ffcc00;
+            color: #000;
+        }
+        
+        .status-success {
+            background: #34c759;
+            color: #fff;
+        }
+        
+        .status-expired {
+            background: #ff3b30;
+            color: #fff;
+        }
+        
         .tab-content {
             display: none;
         }
-
+        
         .tab-content.active {
             display: block;
         }
-
-        .payment-list {
+        
+        .tabs {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #ddd;
         }
-
-        .payment-card {
-            background-color: var(--card-color);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
         }
-
-        .payment-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .payment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .payment-amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-color);
-        }
-
-        .payment-status {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
+        
+        .tab.active {
+            border-bottom: 2px solid var(--tg-theme-button-color);
             font-weight: 500;
         }
-
-        .status-pending {
-            background-color: rgba(255, 152, 0, 0.2);
-            color: var(--warning-color);
-        }
-
-        .status-success {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: var(--success-color);
-        }
-
-        .status-expired {
-            background-color: rgba(207, 102, 121, 0.2);
-            color: var(--error-color);
-        }
-
-        .payment-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        .payment-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
+        
+        .copy-btn {
             background: none;
             border: none;
-            color: var(--secondary-color);
+            color: var(--tg-theme-button-color);
+            padding: 0;
+            margin: 0;
+            width: auto;
             font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            background-color: rgba(3, 218, 198, 0.1);
-            transition: all 0.2s ease;
+            text-decoration: underline;
         }
-
-        .action-btn:hover {
-            background-color: rgba(3, 218, 198, 0.2);
+        
+        .hidden {
+            display: none;
         }
-
-        .action-btn.copy {
-            color: var(--accent-color);
-            background-color: rgba(187, 134, 252, 0.1);
-        }
-
-        .action-btn.copy:hover {
-            background-color: rgba(187, 134, 252, 0.2);
-        }
-
-        .action-btn.refresh {
-            color: var(--warning-color);
-            background-color: rgba(255, 152, 0, 0.1);
-        }
-
-        .action-btn.refresh:hover {
-            background-color: rgba(255, 152, 0, 0.2);
-        }
-
-        .action-btn.delete {
-            color: var(--error-color);
-            background-color: rgba(207, 102, 121, 0.1);
-        }
-
-        .action-btn.delete:hover {
-            background-color: rgba(207, 102, 121, 0.2);
-        }
-
-        .empty-state {
+        
+        #loading {
             text-align: center;
-            padding: 40px 20px;
-            opacity: 0.5;
+            padding: 20px;
         }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background-color: var(--card-color);
-            border-radius: 16px;
-            padding: 24px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--accent-color);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 24px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s ease;
-        }
-
-        .modal-close:hover {
-            opacity: 1;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--divider-color);
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text-color);
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background-color: var(--accent-color);
-            color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
+            border-left-color: var(--tg-theme-button-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
-
-        .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-        }
-
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: var(--accent-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-
+        
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 20px;
-            }
-            
-            .payment-actions {
-                gap: 8px;
-            }
-            
-            .action-btn {
-                font-size: 13px;
-                padding: 5px 10px;
-            }
+        
+        .error-message {
+            color: #ff3b30;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>CiS Admin Panel</h1>
-        <p>Управление платежами и API ключами</p>
-    </div>
-
-    <div class="tabs">
-        <div class="tab active" data-tab="payments">Платежи</div>
-        <div class="tab" data-tab="api-keys">API Ключи</div>
-        <div class="tab" data-tab="create">Создать чек</div>
-    </div>
-
-    <div class="tab-content active" id="payments-tab">
-        <div class="payment-list" id="paymentList">
-            <div class="empty-state" id="paymentsEmpty">
-                <p>Нет созданных платежей</p>
-                <p>Создайте первый чек во вкладке "Создать чек"</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="tab-content" id="api-keys-tab">
-        <div class="payment-list" id="apiKeysList">
-            <div class="empty-state" id="keysEmpty">
-                <p>Нет сохраненных API ключей</p>
-                <p>Добавьте первый ключ для работы с платежами</p>
-            </div>
+    <div class="container">
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
         </div>
         
-        <button class="btn btn-secondary" id="addKeyBtn">
-            <span class="btn-icon">+</span> Добавить API ключ
-        </button>
-    </div>
-
-    <div class="tab-content" id="create-tab">
-        <div class="form-group">
-            <label class="form-label" for="amount">Сумма (руб):</label>
-            <input type="number" class="form-input" id="amount" placeholder="100">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label" for="comment">Комментарий:</label>
-            <input type="text" class="form-input" id="comment" placeholder="Оплата услуг">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label" for="expire">Время жизни (минут):</label>
-            <input type="number" class="form-input" id="expire" placeholder="15" value="15">
-        </div>
-        
-        <button class="btn btn-success" id="createPaymentBtn">
-            <span class="btn-icon">💳</span> Создать платеж
-        </button>
-    </div>
-
-    <!-- Модальное окно для API ключа -->
-    <div class="modal" id="apiKeyModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Добавить API ключ</h2>
-                <button class="modal-close" id="closeApiModal">&times;</button>
+        <div id="app" class="hidden">
+            <h1>CISPay Admin</h1>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="payments">Платежи</div>
+                <div class="tab" data-tab="create">Создать чек</div>
+                <div class="tab" data-tab="api-keys">API Ключи</div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="apiKeyName">Название:</label>
-                <input type="text" class="form-input" id="apiKeyName" placeholder="Мой магазин">
+            <!-- Payments Tab -->
+            <div id="payments" class="tab-content active">
+                <h2>Последние платежи</h2>
+                <div id="payments-list">
+                    <!-- Payments will be loaded here -->
+                </div>
+                <button id="refresh-payments" class="secondary">Обновить</button>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="apiKeyValue">API ключ:</label>
-                <input type="text" class="form-input" id="apiKeyValue" placeholder="api-key">
+            <!-- Create Payment Tab -->
+            <div id="create" class="tab-content">
+                <div class="card">
+                    <h3>Создать новый чек</h3>
+                    <select id="api-key-select">
+                        <option value="">Выберите API ключ</option>
+                    </select>
+                    <input type="number" id="amount" placeholder="Сумма (руб)" min="1">
+                    <input type="number" id="expire" placeholder="Время жизни (минут)" min="1" value="15">
+                    <textarea id="comment" placeholder="Комментарий"></textarea>
+                    <button id="create-payment">Создать чек</button>
+                    <div id="create-error" class="error-message hidden"></div>
+                </div>
+                
+                <div id="payment-result" class="card hidden">
+                    <h3>Чек создан</h3>
+                    <p><strong>Сумма:</strong> <span id="result-amount"></span> руб</p>
+                    <p><strong>Комментарий:</strong> <span id="result-comment"></span></p>
+                    <p><strong>Статус:</strong> <span class="payment-status status-waiting">ожидает оплаты</span></p>
+                    <p><strong>Ссылка:</strong> <span id="result-url"></span></p>
+                    <button class="copy-btn" id="copy-url">Копировать ссылку</button>
+                    <button class="secondary" id="share-url">Поделиться</button>
+                    <button id="check-status">Проверить статус</button>
+                    <div id="status-error" class="error-message hidden"></div>
+                </div>
             </div>
             
-            <button class="btn" id="saveApiKeyBtn">Сохранить ключ</button>
-        </div>
-    </div>
-
-    <!-- Модальное окно для деталей платежа -->
-    <div class="modal" id="paymentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Детали платежа</h2>
-                <button class="modal-close" id="closePaymentModal">&times;</button>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Сумма:</label>
-                <div class="payment-amount" id="modalAmount">0 ₽</div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Комментарий:</label>
-                <div class="comment" id="modalComment">-</div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Статус:</label>
-                <div class="payment-status" id="modalStatus">-</div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Ссылка:</label>
-                <input type="text" class="form-input" id="modalUrl" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">UUID:</label>
-                <input type="text" class="form-input" id="modalUuid" readonly>
-            </div>
-            
-            <div class="payment-actions" style="justify-content: center;">
-                <button class="action-btn copy" id="copyLinkBtn">
-                    📋 Копировать ссылку
-                </button>
-                <button class="action-btn refresh" id="refreshStatusBtn">
-                    🔄 Обновить статус
-                </button>
+            <!-- API Keys Tab -->
+            <div id="api-keys" class="tab-content">
+                <div class="card">
+                    <h3>Добавить API ключ</h3>
+                    <input type="text" id="new-api-key" placeholder="API ключ">
+                    <button id="add-api-key">Добавить ключ</button>
+                    <div id="api-key-error" class="error-message hidden"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Мои API ключи</h3>
+                    <div id="api-keys-list">
+                        <!-- API keys will be loaded here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="fab" id="fabBtn">+</div>
 
     <script>
-        // Инициализация WebApp
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-        Telegram.WebApp.setBackgroundColor('#121212');
-        Telegram.WebApp.MainButton.hide();
-
-        // Хранение данных
+        // Telegram WebApp initialization
+        const tg = window.Telegram.WebApp;
+        
+        // App state
         let apiKeys = [];
         let payments = [];
-        let currentApiKey = '';
+        let currentPayment = null;
         
-        // Элементы DOM
-        const paymentList = document.getElementById('paymentList');
-        const paymentsEmpty = document.getElementById('paymentsEmpty');
-        const apiKeysList = document.getElementById('apiKeysList');
-        const keysEmpty = document.getElementById('keysEmpty');
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const fabBtn = document.getElementById('fabBtn');
-        const addKeyBtn = document.getElementById('addKeyBtn');
-        const createPaymentBtn = document.getElementById('createPaymentBtn');
-        const apiKeyModal = document.getElementById('apiKeyModal');
-        const closeApiModal = document.getElementById('closeApiModal');
-        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-        const paymentModal = document.getElementById('paymentModal');
-        const closePaymentModal = document.getElementById('closePaymentModal');
+        // DOM elements
+        const app = document.getElementById('app');
+        const loading = document.getElementById('loading');
+        const apiKeysList = document.getElementById('api-keys-list');
+        const apiKeySelect = document.getElementById('api-key-select');
+        const paymentsList = document.getElementById('payments-list');
+        const paymentResult = document.getElementById('payment-result');
+        const createError = document.getElementById('create-error');
+        const statusError = document.getElementById('status-error');
+        const apiKeyError = document.getElementById('api-key-error');
         
-        // Формы
-        const amountInput = document.getElementById('amount');
-        const commentInput = document.getElementById('comment');
-        const expireInput = document.getElementById('expire');
-        const apiKeyNameInput = document.getElementById('apiKeyName');
-        const apiKeyValueInput = document.getElementById('apiKeyValue');
+        // CISPay API endpoints
+        const CISPAY_API = {
+            CREATE: 'https://api.cispay.pro/payment/create',
+            INFO: 'https://api.cispay.pro/payment/info'
+        };
         
-        // Модальные элементы
-        const modalAmount = document.getElementById('modalAmount');
-        const modalComment = document.getElementById('modalComment');
-        const modalStatus = document.getElementById('modalStatus');
-        const modalUrl = document.getElementById('modalUrl');
-        const modalUuid = document.getElementById('modalUuid');
-        const copyLinkBtn = document.getElementById('copyLinkBtn');
-        const refreshStatusBtn = document.getElementById('refreshStatusBtn');
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Expand the WebApp to full height
+            tg.expand();
+            
+            // Load data
+            loadApiKeys();
+            loadPayments();
+            
+            // Show the app
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                app.classList.remove('hidden');
+            }, 500);
+            
+            // Setup tab switching
+            setupTabs();
+            
+            // Setup buttons
+            setupButtons();
+        });
         
-        // Вибрация
-        function triggerHaptic() {
-            if (Telegram.WebApp.isVersionAtLeast('6.1')) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('light');
-            }
+        // Tab switching
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
         }
         
-        // Загрузка данных
-        function loadData() {
-            if (Telegram.WebApp.isVersionAtLeast('6.9')) {
-                Telegram.WebApp.CloudStorage.getItem('cis_api_keys', (err, data) => {
-                    if (data) {
-                        apiKeys = JSON.parse(data) || [];
-                        renderApiKeys();
-                        
-                        if (apiKeys.length > 0) {
-                            currentApiKey = apiKeys[0].value;
-                        }
-                    }
-                });
-                
-                Telegram.WebApp.CloudStorage.getItem('cis_payments', (err, data) => {
-                    if (data) {
-                        payments = JSON.parse(data) || [];
-                        renderPayments();
-                    }
-                });
-            } else {
-                const savedKeys = localStorage.getItem('cis_api_keys');
-                apiKeys = savedKeys ? JSON.parse(savedKeys) : [];
+        // Button event handlers
+        function setupButtons() {
+            // Add API key
+            document.getElementById('add-api-key').addEventListener('click', addApiKey);
+            
+            // Create payment
+            document.getElementById('create-payment').addEventListener('click', createPayment);
+            
+            // Copy URL
+            document.getElementById('copy-url').addEventListener('click', copyPaymentUrl);
+            
+            // Share URL
+            document.getElementById('share-url').addEventListener('click', sharePaymentUrl);
+            
+            // Check status
+            document.getElementById('check-status').addEventListener('click', checkPaymentStatus);
+            
+            // Refresh payments
+            document.getElementById('refresh-payments').addEventListener('click', loadPayments);
+        }
+        
+        // Load API keys from storage
+        function loadApiKeys() {
+            const savedKeys = localStorage.getItem('cispay_api_keys');
+            if (savedKeys) {
+                apiKeys = JSON.parse(savedKeys);
                 renderApiKeys();
-                
-                if (apiKeys.length > 0) {
-                    currentApiKey = apiKeys[0].value;
-                }
-                
-                const savedPayments = localStorage.getItem('cis_payments');
-                payments = savedPayments ? JSON.parse(savedPayments) : [];
-                renderPayments();
+                updateApiKeySelect();
             }
         }
         
-        // Сохранение данных
-        function saveData() {
-            if (Telegram.WebApp.isVersionAtLeast('6.9')) {
-                Telegram.WebApp.CloudStorage.setItem('cis_api_keys', JSON.stringify(apiKeys));
-                Telegram.WebApp.CloudStorage.setItem('cis_payments', JSON.stringify(payments));
-            } else {
-                localStorage.setItem('cis_api_keys', JSON.stringify(apiKeys));
-                localStorage.setItem('cis_payments', JSON.stringify(payments));
-            }
+        // Save API keys to storage
+        function saveApiKeys() {
+            localStorage.setItem('cispay_api_keys', JSON.stringify(apiKeys));
         }
         
-        // Отображение API ключей
+        // Render API keys list
         function renderApiKeys() {
             apiKeysList.innerHTML = '';
             
             if (apiKeys.length === 0) {
-                keysEmpty.style.display = 'block';
+                apiKeysList.innerHTML = '<p>Нет сохраненных API ключей</p>';
                 return;
             }
-            
-            keysEmpty.style.display = 'none';
             
             apiKeys.forEach((key, index) => {
-                const card = document.createElement('div');
-                card.className = 'payment-card';
+                const item = document.createElement('div');
+                item.className = 'api-key-item';
                 
-                const header = document.createElement('div');
-                header.className = 'payment-header';
-                
-                const name = document.createElement('div');
-                name.className = 'payment-amount';
-                name.textContent = key.name;
-                
-                const actions = document.createElement('div');
-                actions.className = 'payment-actions';
+                const keyText = document.createElement('span');
+                keyText.textContent = key.substring(0, 4) + '...' + key.substring(key.length - 4);
                 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'action-btn delete';
-                deleteBtn.innerHTML = '🗑️ Удалить';
-                deleteBtn.onclick = () => {
-                    triggerHaptic();
-                    apiKeys.splice(index, 1);
-                    saveData();
-                    renderApiKeys();
-                    
-                    if (currentApiKey === key.value) {
-                        currentApiKey = apiKeys.length > 0 ? apiKeys[0].value : '';
-                    }
-                };
+                deleteBtn.className = 'copy-btn danger';
+                deleteBtn.textContent = 'Удалить';
+                deleteBtn.addEventListener('click', () => deleteApiKey(index));
                 
-                const useBtn = document.createElement('button');
-                useBtn.className = 'action-btn';
-                useBtn.innerHTML = currentApiKey === key.value ? '✅ Используется' : '🔄 Использовать';
-                useBtn.onclick = () => {
-                    triggerHaptic();
-                    currentApiKey = key.value;
-                    renderApiKeys();
-                };
-                
-                if (currentApiKey === key.value) {
-                    useBtn.disabled = true;
-                }
-                
-                actions.appendChild(useBtn);
-                actions.appendChild(deleteBtn);
-                
-                header.appendChild(name);
-                card.appendChild(header);
-                card.appendChild(actions);
-                
-                apiKeysList.appendChild(card);
+                item.appendChild(keyText);
+                item.appendChild(deleteBtn);
+                apiKeysList.appendChild(item);
             });
         }
         
-        // Отображение платежей
-        function renderPayments() {
-            paymentList.innerHTML = '';
+        // Update API key select dropdown
+        function updateApiKeySelect() {
+            apiKeySelect.innerHTML = '<option value="">Выберите API ключ</option>';
             
-            if (payments.length === 0) {
-                paymentsEmpty.style.display = 'block';
+            apiKeys.forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key.substring(0, 4) + '...' + key.substring(key.length - 4);
+                apiKeySelect.appendChild(option);
+            });
+        }
+        
+        // Add new API key
+        function addApiKey() {
+            const newKey = document.getElementById('new-api-key').value.trim();
+            apiKeyError.classList.add('hidden');
+            
+            if (!newKey) {
+                showError(apiKeyError, 'Введите API ключ');
                 return;
             }
             
-            paymentsEmpty.style.display = 'none';
+            if (apiKeys.includes(newKey)) {
+                showError(apiKeyError, 'Этот ключ уже добавлен');
+                return;
+            }
             
-            // Сортируем по дате (новые сверху)
-            const sortedPayments = [...payments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            apiKeys.push(newKey);
+            saveApiKeys();
+            renderApiKeys();
+            updateApiKeySelect();
             
-            sortedPayments.forEach((payment, index) => {
-                const card = document.createElement('div');
-                card.className = 'payment-card';
-                
-                const header = document.createElement('div');
-                header.className = 'payment-header';
-                
-                const amount = document.createElement('div');
-                amount.className = 'payment-amount';
-                amount.textContent = `${payment.amount} ₽`;
-                
-                const status = document.createElement('div');
-                status.className = `payment-status ${getStatusClass(payment.status)}`;
-                status.textContent = getStatusText(payment.status);
-                
-                const meta = document.createElement('div');
-                meta.className = 'payment-meta';
-                
-                const date = document.createElement('div');
-                date.textContent = new Date(payment.createdAt).toLocaleString();
-                
-                const comment = document.createElement('div');
-                comment.textContent = payment.comment || 'Без комментария';
-                
-                const actions = document.createElement('div');
-                actions.className = 'payment-actions';
-                
-                const detailsBtn = document.createElement('button');
-                detailsBtn.className = 'action-btn copy';
-                detailsBtn.innerHTML = '👁️ Подробнее';
-                detailsBtn.onclick = () => {
-                    triggerHaptic();
-                    showPaymentDetails(payment);
-                };
-                
-                const refreshBtn = document.createElement('button');
-                refreshBtn.className = 'action-btn refresh';
-                refreshBtn.innerHTML = '🔄 Обновить';
-                refreshBtn.onclick = () => {
-                    triggerHaptic();
-                    checkPaymentStatus(payment.uuid, true);
-                };
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'action-btn delete';
-                deleteBtn.innerHTML = '🗑️ Удалить';
-                deleteBtn.onclick = () => {
-                    triggerHaptic();
-                    payments.splice(payments.findIndex(p => p.uuid === payment.uuid), 1);
-                    saveData();
-                    renderPayments();
-                };
-                
-                actions.appendChild(detailsBtn);
-                actions.appendChild(refreshBtn);
-                actions.appendChild(deleteBtn);
-                
-                header.appendChild(amount);
-                header.appendChild(status);
-                card.appendChild(header);
-                card.appendChild(meta);
-                meta.appendChild(date);
-                meta.appendChild(comment);
-                card.appendChild(actions);
-                
-                paymentList.appendChild(card);
+            document.getElementById('new-api-key').value = '';
+            
+            tg.showPopup({
+                message: 'API ключ добавлен',
+                buttons: [{ type: 'close' }]
             });
         }
         
-        // Получение класса для статуса
-        function getStatusClass(status) {
-            switch (status) {
-                case 'success': return 'status-success';
-                case 'expired': return 'status-expired';
-                default: return 'status-pending';
+        // Delete API key
+        function deleteApiKey(index) {
+            apiKeys.splice(index, 1);
+            saveApiKeys();
+            renderApiKeys();
+            updateApiKeySelect();
+        }
+        
+        // Load payments from storage
+        function loadPayments() {
+            const savedPayments = localStorage.getItem('cispay_payments');
+            if (savedPayments) {
+                payments = JSON.parse(savedPayments);
+                renderPayments();
+            } else {
+                payments = [];
+                renderPayments();
             }
         }
         
-        // Получение текста статуса
-        function getStatusText(status) {
-            switch (status) {
-                case 'success': return 'Оплачен';
-                case 'expired': return 'Истек';
-                default: return 'Ожидание';
-            }
-        }
-        
-        // Создание платежа
-        async function createPayment(amount, comment, expire) {
-            if (!currentApiKey) {
-                showToast('Добавьте API ключ сначала', true);
-                return null;
+        // Render payments list
+        function renderPayments() {
+            paymentsList.innerHTML = '';
+            
+            if (payments.length === 0) {
+                paymentsList.innerHTML = '<p>Нет платежей</p>';
+                return;
             }
             
+            // Sort by date (newest first)
+            payments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            
+            payments.forEach(payment => {
+                const item = document.createElement('div');
+                item.className = 'payment-item';
+                
+                const statusClass = `status-${payment.status}`;
+                
+                item.innerHTML = `
+                    <p><strong>Сумма:</strong> ${payment.amount} руб</p>
+                    <p><strong>Комментарий:</strong> ${payment.comment}</p>
+                    <p><strong>Статус:</strong> <span class="payment-status ${statusClass}">${getStatusText(payment.status)}</span></p>
+                    <p><strong>Дата:</strong> ${new Date(payment.created_at).toLocaleString()}</p>
+                    <button class="copy-btn" data-url="${payment.url}">Копировать ссылку</button>
+                    ${payment.status === 'waiting' ? '<button class="secondary check-payment-status" data-uuid="${payment.uuid}">Проверить статус</button>' : ''}
+                `;
+                
+                paymentsList.appendChild(item);
+            });
+            
+            // Add event listeners to copy buttons
+            document.querySelectorAll('[data-url]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const url = btn.getAttribute('data-url');
+                    navigator.clipboard.writeText(url);
+                    tg.showPopup({
+                        message: 'Ссылка скопирована',
+                        buttons: [{ type: 'close' }]
+                    });
+                });
+            });
+            
+            // Add event listeners to check status buttons
+            document.querySelectorAll('.check-payment-status').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const uuid = btn.getAttribute('data-uuid');
+                    checkSavedPaymentStatus(uuid);
+                });
+            });
+        }
+        
+        // Get status text
+        function getStatusText(status) {
+            const statusMap = {
+                'waiting': 'ожидает оплаты',
+                'success': 'оплачено',
+                'expired': 'истекло'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // Create new payment with CISPay API
+        async function createPayment() {
+            const apiKey = apiKeySelect.value;
+            const amount = document.getElementById('amount').value;
+            const expire = document.getElementById('expire').value || 15;
+            const comment = document.getElementById('comment').value || 'Оплата';
+            
+            createError.classList.add('hidden');
+            
+            // Validation
+            if (!apiKey) {
+                showError(createError, 'Выберите API ключ');
+                return;
+            }
+            
+            if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+                showError(createError, 'Введите корректную сумму');
+                return;
+            }
+            
+            if (!expire || isNaN(expire) || parseInt(expire) <= 0) {
+                showError(createError, 'Введите корректное время жизни');
+                return;
+            }
+            
+            // Show loading
+            tg.MainButton.showProgress();
+            
             try {
-                const data = {
-                    shop_to: currentApiKey,
+                // Prepare request data
+                const requestData = {
+                    shop_to: apiKey,
                     sum: parseFloat(amount),
                     comment: comment,
                     expire: parseInt(expire)
                 };
                 
-                const response = await fetch('https://api.cispay.pro/payment/create', {
+                // Make API request
+                const response = await fetch(CISPAY_API.CREATE, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(requestData)
                 });
                 
-                const result = await response.json();
+                const data = await response.json();
                 
-                if (result.uuid && result.url) {
-                    const payment = {
-                        uuid: result.uuid,
-                        url: result.url,
-                        amount: amount,
-                        comment: comment,
-                        expire: expire,
-                        status: 'waiting',
-                        createdAt: new Date().toISOString(),
-                        apiKey: currentApiKey
-                    };
-                    
-                    payments.unshift(payment);
-                    saveData();
-                    renderPayments();
-                    
-                    // Переключаем на вкладку платежей
-                    switchTab('payments');
-                    
-                    showToast('Платеж создан!');
-                    triggerHaptic();
-                    
-                    return payment;
-                } else {
-                    throw new Error('Ошибка создания платежа');
+                if (!response.ok) {
+                    throw new Error(data.message || 'Ошибка при создании платежа');
                 }
-            } catch (error) {
-                console.error('Payment error:', error);
-                showToast('Ошибка создания платежа', true);
-                return null;
-            }
-        }
-        
-        // Проверка статуса платежа
-        async function checkPaymentStatus(uuid, manualCheck = false) {
-            const paymentIndex = payments.findIndex(p => p.uuid === uuid);
-            if (paymentIndex === -1) return;
-            
-            try {
-                const data = {
-                    shop_uuid: payments[paymentIndex].apiKey,
-                    order_uuid: uuid
+                
+                // Create payment object
+                currentPayment = {
+                    uuid: data.uuid,
+                    amount: parseFloat(amount),
+                    comment: comment,
+                    status: 'waiting',
+                    url: data.url,
+                    created_at: new Date().toISOString(),
+                    api_key: apiKey,
+                    expire_minutes: parseInt(expire)
                 };
                 
-                const response = await fetch('https://api.cispay.pro/payment/info', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                // Add to payments list
+                payments.unshift(currentPayment);
+                savePayment(currentPayment);
+                
+                // Show result
+                document.getElementById('result-amount').textContent = amount;
+                document.getElementById('result-comment').textContent = comment;
+                document.getElementById('result-url').textContent = data.url;
+                paymentResult.classList.remove('hidden');
+                
+                // Scroll to result
+                paymentResult.scrollIntoView({ behavior: 'smooth' });
+                
+                // Show success message
+                tg.showPopup({
+                    message: 'Чек успешно создан',
+                    buttons: [{ type: 'close' }]
                 });
                 
-                const result = await response.json();
+                // Update payments list
+                renderPayments();
                 
-                if (result.status) {
-                    payments[paymentIndex].status = result.status;
-                    saveData();
-                    renderPayments();
-                    
-                    if (paymentModal.classList.contains('active') && 
-                        modalUuid.value === uuid) {
-                        updatePaymentModal(payments[paymentIndex]);
-                    }
-                    
-                    if (manualCheck) {
-                        showToast(`Статус обновлен: ${getStatusText(result.status)}`);
-                        triggerHaptic();
-                    }
-                    
-                    return result.status === 'success';
-                }
-                
-                return false;
             } catch (error) {
-                console.error('Status check error:', error);
-                if (manualCheck) {
-                    showToast('Ошибка проверки статуса', true);
-                }
-                return false;
+                showError(createError, error.message || 'Неизвестная ошибка');
+                console.error('Error creating payment:', error);
+            } finally {
+                // Hide loading
+                tg.MainButton.hideProgress();
             }
         }
         
-        // Показать детали платежа
-        function showPaymentDetails(payment) {
-            modalAmount.textContent = `${payment.amount} ₽`;
-            modalComment.textContent = payment.comment || 'Без комментария';
-            modalStatus.textContent = getStatusText(payment.status);
-            modalStatus.className = `payment-status ${getStatusClass(payment.status)}`;
-            modalUrl.value = payment.url;
-            modalUuid.value = payment.uuid;
+        // Copy payment URL to clipboard
+        function copyPaymentUrl() {
+            if (!currentPayment) return;
             
-            paymentModal.classList.add('active');
+            navigator.clipboard.writeText(currentPayment.url);
+            tg.showPopup({
+                message: 'Ссылка скопирована',
+                buttons: [{ type: 'close' }]
+            });
         }
         
-        // Обновить модальное окно платежа
-        function updatePaymentModal(payment) {
-            modalAmount.textContent = `${payment.amount} ₽`;
-            modalStatus.textContent = getStatusText(payment.status);
-            modalStatus.className = `payment-status ${getStatusClass(payment.status)}`;
+        // Share payment URL via Telegram
+        function sharePaymentUrl() {
+            if (!currentPayment) return;
+            
+            tg.openTelegramLink(currentPayment.url);
         }
         
-        // Всплывающее уведомление
-        function showToast(message, isError = false) {
-            const toast = document.createElement('div');
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.left = '50%';
-            toast.style.transform = 'translateX(-50%)';
-            toast.style.backgroundColor = isError ? 'rgba(207, 102, 121, 0.9)' : 'rgba(30, 30, 30, 0.9)';
-            toast.style.color = 'white';
-            toast.style.padding = '12px 24px';
-            toast.style.borderRadius = '24px';
-            toast.style.zIndex = '1000';
-            toast.style.animation = 'fadeIn 0.3s, fadeOut 0.3s 2s forwards';
-            toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-            toast.style.display = 'flex';
-            toast.style.alignItems = 'center';
-            toast.style.gap = '8px';
-            toast.textContent = message;
+        // Check payment status with CISPay API
+        async function checkPaymentStatus() {
+            if (!currentPayment) return;
             
-            if (isError) {
-                const icon = document.createElement('span');
-                icon.textContent = '⚠️';
-                toast.prepend(icon);
+            statusError.classList.add('hidden');
+            tg.MainButton.showProgress();
+            
+            try {
+                const newStatus = await getPaymentStatus(currentPayment.uuid, currentPayment.api_key);
+                
+                // Update current payment
+                currentPayment.status = newStatus;
+                updatePaymentStatus(currentPayment.uuid, newStatus);
+                
+                // Update UI
+                const statusElement = paymentResult.querySelector('.payment-status');
+                statusElement.className = `payment-status status-${newStatus}`;
+                statusElement.textContent = getStatusText(newStatus);
+                
+                // Show message
+                tg.showPopup({
+                    message: `Статус: ${getStatusText(newStatus)}`,
+                    buttons: [{ type: 'close' }]
+                });
+                
+                // Update payments list
+                renderPayments();
+                
+            } catch (error) {
+                showError(statusError, error.message || 'Ошибка при проверке статуса');
+                console.error('Error checking payment status:', error);
+            } finally {
+                tg.MainButton.hideProgress();
+            }
+        }
+        
+        // Check status of a saved payment
+        async function checkSavedPaymentStatus(uuid) {
+            const payment = payments.find(p => p.uuid === uuid);
+            if (!payment) return;
+            
+            tg.MainButton.showProgress();
+            
+            try {
+                const newStatus = await getPaymentStatus(uuid, payment.api_key);
+                
+                // Update payment status
+                payment.status = newStatus;
+                updatePaymentStatus(uuid, newStatus);
+                
+                // Show message
+                tg.showPopup({
+                    message: `Статус платежа: ${getStatusText(newStatus)}`,
+                    buttons: [{ type: 'close' }]
+                });
+                
+                // Update payments list
+                renderPayments();
+                
+            } catch (error) {
+                tg.showPopup({
+                    message: 'Ошибка при проверке статуса',
+                    buttons: [{ type: 'close' }]
+                });
+                console.error('Error checking payment status:', error);
+            } finally {
+                tg.MainButton.hideProgress();
+            }
+        }
+        
+        // Get payment status from CISPay API
+        async function getPaymentStatus(uuid, apiKey) {
+            const requestData = {
+                shop_uuid: apiKey,
+                order_uuid: uuid
+            };
+            
+            const response = await fetch(CISPAY_API.INFO, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Ошибка при проверке статуса');
             }
             
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 2300);
+            return data.status;
         }
         
-        // Переключение вкладок
-        function switchTab(tabName) {
-            tabs.forEach(tab => {
-                if (tab.dataset.tab === tabName) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-            
-            tabContents.forEach(content => {
-                if (content.id === `${tabName}-tab`) {
-                    content.classList.add('active');
-                } else {
-                    content.classList.remove('active');
-                }
-            });
+        // Save payment to storage
+        function savePayment(payment) {
+            const savedPayments = localStorage.getItem('cispay_payments') || '[]';
+            const allPayments = JSON.parse(savedPayments);
+            allPayments.unshift(payment);
+            localStorage.setItem('cispay_payments', JSON.stringify(allPayments));
         }
         
-        // Инициализация приложения
-        function initApp() {
-            // Загрузка данных
-            loadData();
+        // Update payment status in storage
+        function updatePaymentStatus(uuid, status) {
+            const savedPayments = localStorage.getItem('cispay_payments') || '[]';
+            const allPayments = JSON.parse(savedPayments);
             
-            // Обработчики вкладок
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    triggerHaptic();
-                    switchTab(tab.dataset.tab);
-                });
-            });
-            
-            // Кнопка добавления API ключа
-            addKeyBtn.addEventListener('click', () => {
-                triggerHaptic();
-                apiKeyModal.classList.add('active');
-                apiKeyNameInput.focus();
-            });
-            
-            // Закрытие модального окна API ключа
-            closeApiModal.addEventListener('click', () => {
-                triggerHaptic();
-                apiKeyModal.classList.remove('active');
-            });
-            
-            // Сохранение API ключа
-            saveApiKeyBtn.addEventListener('click', () => {
-                const name = apiKeyNameInput.value.trim();
-                const value = apiKeyValueInput.value.trim();
-                
-                if (!name || !value) {
-                    showToast('Заполните все поля', true);
-                    return;
-                }
-                
-                apiKeys.push({
-                    name: name,
-                    value: value
-                });
-                
-                saveData();
-                renderApiKeys();
-                apiKeyModal.classList.remove('active');
-                apiKeyNameInput.value = '';
-                apiKeyValueInput.value = '';
-                
-                if (apiKeys.length === 1) {
-                    currentApiKey = value;
-                }
-                
-                showToast('API ключ сохранен');
-                triggerHaptic();
-            });
-            
-            // Создание платежа
-            createPaymentBtn.addEventListener('click', async () => {
-                const amount = amountInput.value.trim();
-                const comment = commentInput.value.trim();
-                const expire = expireInput.value.trim();
-                
-                if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-                    showToast('Введите корректную сумму', true);
-                    return;
-                }
-                
-                createPaymentBtn.innerHTML = '<span class="loader"></span> Создание...';
-                const payment = await createPayment(amount, comment, expire || 15);
-                createPaymentBtn.innerHTML = '<span class="btn-icon">💳</span> Создать платеж';
-                
-                if (payment) {
-                    amountInput.value = '';
-                    commentInput.value = '';
-                    showPaymentDetails(payment);
-                }
-            });
-            
-            // Закрытие модального окна платежа
-            closePaymentModal.addEventListener('click', () => {
-                triggerHaptic();
-                paymentModal.classList.remove('active');
-            });
-            
-            // Копирование ссылки
-            copyLinkBtn.addEventListener('click', () => {
-                modalUrl.select();
-                document.execCommand('copy');
-                showToast('Ссылка скопирована');
-                triggerHaptic();
-            });
-            
-            // Обновление статуса
-            refreshStatusBtn.addEventListener('click', async () => {
-                refreshStatusBtn.innerHTML = '<span class="loader"></span> Проверка...';
-                await checkPaymentStatus(modalUuid.value, true);
-                refreshStatusBtn.innerHTML = '🔄 Обновить статус';
-            });
-            
-            // FAB кнопка
-            fabBtn.addEventListener('click', () => {
-                triggerHaptic();
-                const activeTab = document.querySelector('.tab.active').dataset.tab;
-                
-                if (activeTab === 'payments') {
-                    switchTab('create');
-                } else if (activeTab === 'api-keys') {
-                    apiKeyModal.classList.add('active');
-                    apiKeyNameInput.focus();
-                } else {
-                    switchTab('payments');
-                }
-            });
-            
-            // Закрытие модальных окон при клике вне их
-            window.addEventListener('click', (e) => {
-                if (e.target === apiKeyModal) {
-                    apiKeyModal.classList.remove('active');
-                }
-                
-                if (e.target === paymentModal) {
-                    paymentModal.classList.remove('active');
-                }
-            });
-            
-            // Автопроверка статуса платежей каждые 30 секунд
-            setInterval(() => {
-                payments.forEach(payment => {
-                    if (payment.status === 'waiting') {
-                        checkPaymentStatus(payment.uuid);
-                    }
-                });
-            }, 30000);
+            const payment = allPayments.find(p => p.uuid === uuid);
+            if (payment) {
+                payment.status = status;
+                localStorage.setItem('cispay_payments', JSON.stringify(allPayments));
+            }
         }
         
-        // Запуск приложения
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Show error message
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+        
+        // Initialize Telegram WebApp
+        tg.ready();
     </script>
 </body>
 </html>
