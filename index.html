@@ -7,9 +7,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-theme-bg-color: #efeff3;
+            --tg-theme-bg-color: #1a1a1a;
+            --tg-theme-text-color: #ffffff;
+            --tg-theme-hint-color: #aaaaaa;
+            --tg-theme-link-color: #63d0f9;
             --tg-theme-button-color: #63d0f9;
             --tg-theme-button-text-color: #000000;
+            --tg-theme-secondary-bg-color: #2d2d2d;
         }
         
         body {
@@ -32,21 +36,23 @@
         }
         
         .card {
-            background: #ffffff;
+            background: var(--tg-theme-secondary-bg-color);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
         
         input, textarea, select {
             width: 100%;
             padding: 10px;
             margin-bottom: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 8px;
             font-size: 16px;
             box-sizing: border-box;
+            background: #333;
+            color: var(--tg-theme-text-color);
         }
         
         button {
@@ -69,8 +75,8 @@
         }
         
         button.secondary {
-            background: #f1f1f1;
-            color: #000;
+            background: #444;
+            color: white;
         }
         
         button.danger {
@@ -83,7 +89,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #444;
         }
         
         .api-key-item:last-child {
@@ -92,7 +98,7 @@
         
         .payment-item {
             padding: 12px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #444;
         }
         
         .payment-item:last-child {
@@ -133,24 +139,26 @@
         .tabs {
             display: flex;
             margin-bottom: 16px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #444;
         }
         
         .tab {
             padding: 8px 16px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
+            color: var(--tg-theme-hint-color);
         }
         
         .tab.active {
             border-bottom: 2px solid var(--tg-theme-button-color);
             font-weight: 500;
+            color: var(--tg-theme-text-color);
         }
         
         .copy-btn {
             background: none;
             border: none;
-            color: var(--tg-theme-button-color);
+            color: var(--tg-theme-link-color);
             padding: 0;
             margin: 0;
             width: auto;
@@ -168,7 +176,7 @@
         }
         
         .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.1);
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -185,6 +193,27 @@
         .error-message {
             color: #ff3b30;
             margin-top: 8px;
+        }
+        
+        .success-message {
+            color: #34c759;
+            margin-top: 8px;
+        }
+        
+        .advanced-options {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #444;
+        }
+        
+        .toggle-options {
+            background: none;
+            border: none;
+            color: var(--tg-theme-link-color);
+            padding: 8px 0;
+            margin: 8px 0;
+            text-align: left;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -220,9 +249,29 @@
                     <select id="api-key-select">
                         <option value="">Выберите API ключ</option>
                     </select>
-                    <input type="number" id="amount" placeholder="Сумма (руб)" min="1">
+                    <input type="number" id="amount" placeholder="Сумма (руб)" min="0.01" step="0.01">
                     <input type="number" id="expire" placeholder="Время жизни (минут)" min="1" value="15">
-                    <textarea id="comment" placeholder="Комментарий"></textarea>
+                    <textarea id="comment" placeholder="Комментарий" required></textarea>
+                    
+                    <button class="toggle-options" id="toggle-options">Дополнительные параметры ▼</button>
+                    
+                    <div id="advanced-options" class="advanced-options hidden">
+                        <select id="method">
+                            <option value="">Любой метод оплаты</option>
+                            <option value="card">Банковская карта</option>
+                            <option value="qiwi">QIWI</option>
+                            <option value="yoomoney">ЮMoney</option>
+                            <option value="sbp">СБП</option>
+                        </select>
+                        <input type="url" id="hook_url" placeholder="URL для WebHook">
+                        <input type="url" id="success_url" placeholder="URL после оплаты">
+                        <input type="text" id="custom_fields" placeholder="Дополнительные данные">
+                        <select id="subtract">
+                            <option value="0">Комиссия с магазина</option>
+                            <option value="1">Комиссия с клиента</option>
+                        </select>
+                    </div>
+                    
                     <button id="create-payment">Создать чек</button>
                     <div id="create-error" class="error-message hidden"></div>
                 </div>
@@ -237,6 +286,7 @@
                     <button class="secondary" id="share-url">Поделиться</button>
                     <button id="check-status">Проверить статус</button>
                     <div id="status-error" class="error-message hidden"></div>
+                    <div id="status-success" class="success-message hidden"></div>
                 </div>
             </div>
             
@@ -244,9 +294,10 @@
             <div id="api-keys" class="tab-content">
                 <div class="card">
                     <h3>Добавить API ключ</h3>
-                    <input type="text" id="new-api-key" placeholder="API ключ">
+                    <input type="text" id="new-api-key" placeholder="API ключ (UUID)">
                     <button id="add-api-key">Добавить ключ</button>
                     <div id="api-key-error" class="error-message hidden"></div>
+                    <div id="api-key-success" class="success-message hidden"></div>
                 </div>
                 
                 <div class="card">
@@ -277,7 +328,11 @@
         const paymentResult = document.getElementById('payment-result');
         const createError = document.getElementById('create-error');
         const statusError = document.getElementById('status-error');
+        const statusSuccess = document.getElementById('status-success');
         const apiKeyError = document.getElementById('api-key-error');
+        const apiKeySuccess = document.getElementById('api-key-success');
+        const advancedOptions = document.getElementById('advanced-options');
+        const toggleOptions = document.getElementById('toggle-options');
         
         // CISPay API endpoints
         const CISPAY_API = {
@@ -305,6 +360,14 @@
             
             // Setup buttons
             setupButtons();
+            
+            // Toggle advanced options
+            toggleOptions.addEventListener('click', () => {
+                advancedOptions.classList.toggle('hidden');
+                toggleOptions.textContent = advancedOptions.classList.contains('hidden') 
+                    ? 'Дополнительные параметры ▼' 
+                    : 'Дополнительные параметки ▲';
+            });
         });
         
         // Tab switching
@@ -402,10 +465,16 @@
         // Add new API key
         function addApiKey() {
             const newKey = document.getElementById('new-api-key').value.trim();
-            apiKeyError.classList.add('hidden');
+            hideMessages(apiKeyError, apiKeySuccess);
             
             if (!newKey) {
                 showError(apiKeyError, 'Введите API ключ');
+                return;
+            }
+            
+            // Validate UUID format
+            if (!isValidUUID(newKey)) {
+                showError(apiKeyError, 'Неверный формат UUID ключа');
                 return;
             }
             
@@ -421,10 +490,13 @@
             
             document.getElementById('new-api-key').value = '';
             
-            tg.showPopup({
-                message: 'API ключ добавлен',
-                buttons: [{ type: 'close' }]
-            });
+            showSuccess(apiKeySuccess, 'API ключ успешно добавлен');
+        }
+        
+        // Validate UUID format
+        function isValidUUID(uuid) {
+            const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            return regex.test(uuid);
         }
         
         // Delete API key
@@ -433,6 +505,8 @@
             saveApiKeys();
             renderApiKeys();
             updateApiKeySelect();
+            
+            showSuccess(apiKeySuccess, 'API ключ удален');
         }
         
         // Load payments from storage
@@ -466,7 +540,7 @@
                 const statusClass = `status-${payment.status}`;
                 
                 item.innerHTML = `
-                    <p><strong>Сумма:</strong> ${payment.amount} руб</p>
+                    <p><strong>Сумма:</strong> ${payment.amount.toFixed(2)} руб</p>
                     <p><strong>Комментарий:</strong> ${payment.comment}</p>
                     <p><strong>Статус:</strong> <span class="payment-status ${statusClass}">${getStatusText(payment.status)}</span></p>
                     <p><strong>Дата:</strong> ${new Date(payment.created_at).toLocaleString()}</p>
@@ -481,11 +555,7 @@
             document.querySelectorAll('[data-url]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const url = btn.getAttribute('data-url');
-                    navigator.clipboard.writeText(url);
-                    tg.showPopup({
-                        message: 'Ссылка скопирована',
-                        buttons: [{ type: 'close' }]
-                    });
+                    copyToClipboard(url);
                 });
             });
             
@@ -511,11 +581,18 @@
         // Create new payment with CISPay API
         async function createPayment() {
             const apiKey = apiKeySelect.value;
-            const amount = document.getElementById('amount').value;
-            const expire = document.getElementById('expire').value || 15;
-            const comment = document.getElementById('comment').value || 'Оплата';
+            const amount = parseFloat(document.getElementById('amount').value);
+            const expire = parseInt(document.getElementById('expire').value) || 15;
+            const comment = document.getElementById('comment').value.trim();
             
-            createError.classList.add('hidden');
+            // Advanced options
+            const method = document.getElementById('method').value;
+            const hook_url = document.getElementById('hook_url').value.trim();
+            const success_url = document.getElementById('success_url').value.trim();
+            const custom_fields = document.getElementById('custom_fields').value.trim();
+            const subtract = document.getElementById('subtract').value;
+            
+            hideMessages(createError);
             
             // Validation
             if (!apiKey) {
@@ -523,13 +600,18 @@
                 return;
             }
             
-            if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-                showError(createError, 'Введите корректную сумму');
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showError(createError, 'Введите корректную сумму (минимум 0.01 руб)');
                 return;
             }
             
-            if (!expire || isNaN(expire) || parseInt(expire) <= 0) {
-                showError(createError, 'Введите корректное время жизни');
+            if (!expire || isNaN(expire) || expire <= 0) {
+                showError(createError, 'Введите корректное время жизни (минимум 1 минута)');
+                return;
+            }
+            
+            if (!comment) {
+                showError(createError, 'Введите комментарий');
                 return;
             }
             
@@ -540,36 +622,54 @@
                 // Prepare request data
                 const requestData = {
                     shop_to: apiKey,
-                    sum: parseFloat(amount),
+                    sum: amount.toFixed(2),
                     comment: comment,
-                    expire: parseInt(expire)
+                    expire: expire
                 };
                 
-                // Make API request
+                // Add optional fields
+                if (method) requestData.method = method;
+                if (hook_url) requestData.hook_url = hook_url;
+                if (success_url) requestData.success_url = success_url;
+                if (custom_fields) requestData.custom_fields = custom_fields;
+                if (subtract) requestData.subtract = subtract;
+                
+                // Make API request with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+                
                 const response = await fetch(CISPAY_API.CREATE, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestData)
+                    body: JSON.stringify(requestData),
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Ошибка сервера: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Ошибка при создании платежа');
+                if (!data.uuid || !data.url) {
+                    throw new Error('Неверный формат ответа от сервера');
                 }
                 
                 // Create payment object
                 currentPayment = {
                     uuid: data.uuid,
-                    amount: parseFloat(amount),
+                    amount: amount,
                     comment: comment,
                     status: 'waiting',
                     url: data.url,
                     created_at: new Date().toISOString(),
                     api_key: apiKey,
-                    expire_minutes: parseInt(expire)
+                    expire_minutes: expire
                 };
                 
                 // Add to payments list
@@ -577,7 +677,7 @@
                 savePayment(currentPayment);
                 
                 // Show result
-                document.getElementById('result-amount').textContent = amount;
+                document.getElementById('result-amount').textContent = amount.toFixed(2);
                 document.getElementById('result-comment').textContent = comment;
                 document.getElementById('result-url').textContent = data.url;
                 paymentResult.classList.remove('hidden');
@@ -595,29 +695,43 @@
                 renderPayments();
                 
             } catch (error) {
-                showError(createError, error.message || 'Неизвестная ошибка');
                 console.error('Error creating payment:', error);
+                const errorMessage = error.name === 'AbortError' 
+                    ? 'Превышено время ожидания ответа от сервера' 
+                    : error.message || 'Ошибка при создании платежа';
+                showError(createError, errorMessage);
             } finally {
                 // Hide loading
                 tg.MainButton.hideProgress();
             }
         }
         
+        // Copy to clipboard with fallback
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                tg.showPopup({
+                    message: 'Ссылка скопирована',
+                    buttons: [{ type: 'close' }]
+                });
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                tg.showPopup({
+                    message: 'Не удалось скопировать ссылку',
+                    buttons: [{ type: 'close' }]
+                });
+            }
+        }
+        
         // Copy payment URL to clipboard
         function copyPaymentUrl() {
             if (!currentPayment) return;
-            
-            navigator.clipboard.writeText(currentPayment.url);
-            tg.showPopup({
-                message: 'Ссылка скопирована',
-                buttons: [{ type: 'close' }]
-            });
+            copyToClipboard(currentPayment.url);
         }
         
         // Share payment URL via Telegram
         function sharePaymentUrl() {
             if (!currentPayment) return;
-            
             tg.openTelegramLink(currentPayment.url);
         }
         
@@ -625,7 +739,7 @@
         async function checkPaymentStatus() {
             if (!currentPayment) return;
             
-            statusError.classList.add('hidden');
+            hideMessages(statusError, statusSuccess);
             tg.MainButton.showProgress();
             
             try {
@@ -640,18 +754,15 @@
                 statusElement.className = `payment-status status-${newStatus}`;
                 statusElement.textContent = getStatusText(newStatus);
                 
-                // Show message
-                tg.showPopup({
-                    message: `Статус: ${getStatusText(newStatus)}`,
-                    buttons: [{ type: 'close' }]
-                });
+                // Show success message
+                showSuccess(statusSuccess, `Статус обновлен: ${getStatusText(newStatus)}`);
                 
                 // Update payments list
                 renderPayments();
                 
             } catch (error) {
-                showError(statusError, error.message || 'Ошибка при проверке статуса');
                 console.error('Error checking payment status:', error);
+                showError(statusError, error.message || 'Ошибка при проверке статуса');
             } finally {
                 tg.MainButton.hideProgress();
             }
@@ -681,11 +792,11 @@
                 renderPayments();
                 
             } catch (error) {
+                console.error('Error checking payment status:', error);
                 tg.showPopup({
                     message: 'Ошибка при проверке статуса',
                     buttons: [{ type: 'close' }]
                 });
-                console.error('Error checking payment status:', error);
             } finally {
                 tg.MainButton.hideProgress();
             }
@@ -698,18 +809,29 @@
                 order_uuid: uuid
             };
             
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+            
             const response = await fetch(CISPAY_API.INFO, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
+                signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Ошибка сервера: ${response.status}`);
+            }
             
             const data = await response.json();
             
-            if (!response.ok) {
-                throw new Error(data.message || 'Ошибка при проверке статуса');
+            if (!data.status) {
+                throw new Error('Неверный формат ответа от сервера');
             }
             
             return data.status;
@@ -739,6 +861,18 @@
         function showError(element, message) {
             element.textContent = message;
             element.classList.remove('hidden');
+        }
+        
+        // Show success message
+        function showSuccess(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+            setTimeout(() => element.classList.add('hidden'), 3000);
+        }
+        
+        // Hide messages
+        function hideMessages(...elements) {
+            elements.forEach(el => el.classList.add('hidden'));
         }
         
         // Initialize Telegram WebApp
